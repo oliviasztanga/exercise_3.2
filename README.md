@@ -13,7 +13,8 @@ git clone <this repo's remote url>
 cd demo_3.2
 
 # create a virtual environment for this project & activate
-virtualenv env
+mkdir env
+python3 -m venv env
 source env/bin/activate
 
 # install the requirments
