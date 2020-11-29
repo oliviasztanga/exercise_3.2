@@ -26,6 +26,7 @@ python app.py
 ## Instructions
 
 **Table Definition**
+
 In `models.py`, add the following properties to the `Task` and `User` tables:
 
 Task
@@ -44,12 +45,14 @@ Optional: Project
 - Name: String, Required
 
 **Relationships**
+
 In `models.py`, create the following relationships:
 
 Users and Tasks should have a one-to-many relationship.
 Optional: Projects and Tasks may have a one-to-many or many-to-many relationship.
 
 **Seeding**
+
 In `seed.py`, create at least five entries for every table and make sure to set relationships.
 
 **Demoing**
