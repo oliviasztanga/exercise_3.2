@@ -55,5 +55,3 @@ Optional: Projects and Tasks may have a one-to-many or many-to-many relationship
 
 In `seed.py`, create at least five entries for every table and make sure to set relationships.
 
-**Demoing**
-- Make sure to show changes to the tables in Postico.
