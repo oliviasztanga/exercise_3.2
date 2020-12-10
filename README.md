@@ -121,36 +121,168 @@ DATABASE_URI = "postgres+psycopg2://postgres:postgres@localhost:5432/todo"
 <hr>
 
 ### Declarative Base
+In SQL-Alchemy, we define models by creating classes. Furthermore, the models we define need to branch off of a declarative base in order to register our models with SQL-Alchemy. In `models.py`, you can see that we import the factory function `declarative_base` and then invoke it to create the `Base` class that we extend to create our model classes. Think about this in object-oriented design: our models will inherit all of the functionality from `Base`, which in this case is functionality specific to SQL-Alchemy, and `Base` will likely have some knowledge of the classes that extend it.
+
+Additionally, every model we define as a class will receive an attribute `__tablename__` with a name for that table.
+
 
 ### Column Types
+In Postgres, columns are restricted to a specific data type. As a result, we need to define the datatypes for columns in our SQL-Alchemy app as well. To do so, we we use the `Column` object which we have already imported in `models.py`. The `Column` object takes a data type as its first argument and uses it to define the data type for that column. Additionally, every model we define as a class will have a column for the primary key.
+
+For example, if we were creating a table for students in a school system:
+
+```py
+class Student(Base):
+  __tablename__ = 'students'
+  id = Column(Integer, primary_key=True)
+  name = Column(String)
+  grade = Column(Integer)
+```
+
+You can find more docs on defining columns [here](https://docs.sqlalchemy.org/en/13/core/type_basics.html).
 
 ### Constraints
+Besides the data type, you may want to further constrain a column. To define further constraints, you can provide additional arguments to the `Column`.
+
+For example, students should always have a name and therefore the `Name` column should never be empty. To prevent `null` entries for the `Name` column, we can pass a `nullable` argument to `Column`:
+
+```py
+class Student(Base):
+  __tablename__ = 'students'
+  id = Column(Integer, primary_key=True)
+  name = Column(String, nullable=False)
+  grade = Column(Integer)
+```
+
+You can find more docs on constraining columns [here](https://docs.sqlalchemy.org/en/13/core/constraints.html).
 
 <hr>
 </details><br>
 
 ### 🖥 Define models for Person, Task, and Project
+In `models.py`, add the following properties to the `Person`, `Task`, and `Project` tables:
+
+**Person**<br>
+Id: `Integer, Primary Key`<br>
+Name: `String, Required`<br>
+
+**Task**<br>
+Id: `Integer, Primary Key`<br>
+Name: `String, Required`<br>
+Description: `String`<br>
+Due Date: `Date`<br>
+
+**Project**<br>
+Id: `Integer, Primary Key`<br>
+Name: `String, Required`<br>
+<br>
+
+<details><summary>Click here for the solution.</summary>
+<hr>
+  
+```py
+class Person(Base):
+    __tablename__ = "persons"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    
+class Task(Base):
+    __tablename__ = "tasks"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    due_date = Column(Date)
+    
+class Project(Base):
+    __tablename__ = "projects"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+
+```
+
+<hr>
+</details>
 <br>
 
 <details><summary>💡 How do we define relationships in SQL-Alchemy?</summary>
 <hr>
+We define relationships using very specific patterns that SQL-Alchemy outlines in great detail [here](https://docs.sqlalchemy.org/en/13/orm/basic_relationships.html). For this workshop, let's focus on how to define a one-to-many relationship.
+  
+In a one-to-many relationship, one class will get a foreign key attribute referencing the primary key of another table and a `relationship` attribute referencing the other class. The other table will just get a `relationship` attribute referencing the first class. Each `relationship` attribute also receives a `back_populates` argument referencing the other class's relationship attribute to ensure this relationship is bidirectional (that updates to one table will be reflected in updates to the other table). That's a mouthful, but here is an example:
 
-### One-to-One
+```py
+class Person(Base):
+    __tablename__ = "persons"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    
+    tasks = relationship("Task", back_populates="person")
+    
+    
+class Task(Base):
+    __tablename__ = "tasks"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    due_date = Column(Date)
+    
+    person_id = Column(Integer, ForeignKey('persons.id'))
+    person = relationship("Person", back_populates="tasks")
 
-### One-to-Many
-
-### Many-to-Many
+```
 
 <hr>
-</details><br>
+</details><br><br>
 
 ### 🖥 Define relationships between your models
+In `models.py`, create the following relationships:
+
+- Users and Tasks should have a one-to-many relationship.
+- Tasks and Projects should have a one-to-many relationship.
+
+<details><summary>Click here for the solution.</summary>
+<hr>
+  
+```py
+class Person(Base):
+    __tablename__ = "persons"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    
+    tasks = relationship("Task", back_populates="person")
+ 
+ 
+class Task(Base):
+    __tablename__ = "tasks"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    due_date = Column(Date)
+    
+    person_id = Column(Integer, ForeignKey('persons.id'))
+    person = relationship("Person", back_populates="tasks")
+    
+    project_id = Column(Integer, ForeignKey('projects.id'))
+    project = relationship("Project", back_populates="tasks")
+  
+  
+class Project(Base):
+    __tablename__ = "projects"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    
+    tasks = relationship("Task", back_populates="project")
+
+```
+
+<hr>
+</details>
 <br>
 <br>
 
 
 ### 🖥 Create your tables
-<br>
+You can now run `python app.py` in your terminal. This will run the `refresh_database` function, which uses built in SQL-Alchemy methods to drop all tables and then create all tables. Once this is run, you should be able to see the database tables and columns either using `psql` or your chosen GUI (Postico or pgAdmin).
 <br>
 
 
@@ -170,10 +302,6 @@ DATABASE_URI = "postgres+psycopg2://postgres:postgres@localhost:5432/todo"
 </details><br>
 
 ### 🖥 Create entries for each of your models
-<br>
-
-### 🖥 Define relationships between your models
-<br>
 <br>
 
 
