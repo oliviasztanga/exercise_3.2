@@ -295,13 +295,31 @@ You can now run `python app.py` in your terminal. This will run the `refresh_dat
 <hr>
 
 ### Sessionmaker and Sessions
+Technically, we can create models and entries by using methods on the `engine` directly. However, it's better to use sessions because they allow us to group and rollback transactions in case there is an error. Once you have completed your desired set of transactions, you can use the `commit` method off of a session to commit your transactions permanently to your database.
+
+Sessions are created by invoking the `sessionmaker` module, which is already imported and binded to the engine in `app.py`.  The `seed` function in `seed.py` receives a created session when it is invoked in `app.py`.
 
 ### Instances
+Our models are defined as classes. That means we can create entries in our model by creating instances of those classes. Once it has been created, we `add` it to our session and finally we `commit` our session. See the following example:
 
+```py
+person_instance = Person(name="Laura Jean")
+session.add(person_instance)
+session.commit()
+```
+
+We can add multiple instances at one using the `add_all` method.
+
+```py
+persons = [ Person(name="Laura Jean"), Person(name="Bilbo Baggins") ]
+session.add_all(persons)
+session.commit()
+```
 <hr>
 </details><br>
 
 ### 🖥 Create entries for each of your models
+Go ahead and have some fun creating entries for your databse! When you are ready to seed your database, comment out the `refresh_database` function and uncomment the `seed` function in `app.py`. Then run `python app.py` to seed your tables. You should be able to see the database tables and columns either using `psql` or your chosen GUI (Postico or pgAdmin).
 <br>
 
 
